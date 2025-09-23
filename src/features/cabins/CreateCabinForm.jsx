@@ -1,5 +1,3 @@
-import styled from "styled-components";
-
 import Input from "../../ui/Input";
 import Form from "../../ui/Form";
 import Button from "../../ui/Button";
@@ -7,49 +5,27 @@ import FileInput from "../../ui/FileInput";
 import Textarea from "../../ui/Textarea";
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addCabins } from "../../services/apiCabins";
+import { addCabins, updateCabins } from "../../services/apiCabins";
 import toast from "react-hot-toast";
+import FormRow from "../../ui/FormRow";
 
-const FormRow = styled.div`
-  display: grid;
-  align-items: center;
-  grid-template-columns: 24rem 1fr 1.2fr;
-  gap: 2.4rem;
-
-  padding: 1.2rem 0;
-
-  &:first-child {
-    padding-top: 0;
-  }
-
-  &:last-child {
-    padding-bottom: 0;
-  }
-
-  &:not(:last-child) {
-    border-bottom: 1px solid var(--color-grey-100);
-  }
-
-  &:has(button) {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1.2rem;
-  }
-`;
-
-const Label = styled.label`
-  font-weight: 500;
-`;
-
-const Error = styled.span`
-  font-size: 1.4rem;
-  color: var(--color-red-700);
-`;
-
-function CreateCabinForm() {
-  const { register, handleSubmit, reset } = useForm();
+function CreateCabinForm({ cabinToEdit = {} }) {
+  const { id: editId, ...editigValues } = cabinToEdit;
+  const isEditingSession = Boolean(editId);
+  const { register, handleSubmit, reset, getValues, formState } = useForm({
+    defaultValues: isEditingSession
+      ? {
+          name: editigValues.name,
+          regularPrice: editigValues["regular-price"],
+          maxCapacity: editigValues["max-capacity"],
+          discount: editigValues.discount,
+          description: editigValues.description,
+        }
+      : {},
+  });
+  const { errors } = formState;
   const queryClient = useQueryClient();
-  const { mutate, isLoading: isCreating } = useMutation({
+  const { mutate: createCabins, isLoading: isCreating } = useMutation({
     mutationFn: addCabins,
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -62,65 +38,123 @@ function CreateCabinForm() {
       toast.error(`${err.message} ❌`);
     },
   });
+  const { mutate: updateCabin, isLoading: isUpdating } = useMutation({
+    mutationFn: ({ id, updatedCabin }) => updateCabins(id, updatedCabin),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["cabins"],
+      });
+      toast.success("Cabins updated Succesfully ✅");
+      reset();
+    },
+    onError: (err) => {
+      toast.error(`${err.message}`);
+    },
+  });
+  const isWorking = isCreating || isUpdating;
   function onSumbit(data) {
     const cabinData = {
       name: data.name,
       "regular-price": Number(data.regularPrice),
       "max-capacity": Number(data.maxCapacity),
       discount: Number(data.discount),
-      image: data.image || null,
+      image: data.image?.[0] || editigValues.image,
     };
-    console.log(cabinData);
-    mutate(cabinData);
+    isEditingSession
+      ? updateCabin({ id: editId, updatedCabin: cabinData })
+      : createCabins(cabinData);
+    console.log(data.currentImage);
+  }
+  function onError(error) {
+    console.log(error);
   }
   return (
-    <Form onSubmit={handleSubmit(onSumbit)}>
-      <FormRow>
-        <Label htmlFor="name">Cabin name</Label>
-        <Input type="text" id="name" {...register("name")} />
+    <Form onSubmit={handleSubmit(onSumbit, onError)}>
+      <FormRow label={"Cabin Name"} errors={errors?.name?.message}>
+        <Input
+          type="text"
+          id="name"
+          {...register("name", {
+            required: "this Field Is Required",
+          })}
+          disabled={isWorking}
+        />
+      </FormRow>
+      <FormRow label={"Maximum Capacity"} errors={errors?.maxCapacity?.message}>
+        <Input
+          type="number"
+          id="maxCapacity"
+          {...register("maxCapacity", {
+            required: "This Field Is Requried",
+            validate: (value) =>
+              value > 1 || "This Field Must Be Greater Than 1",
+          })}
+          disabled={isWorking}
+        />
+      </FormRow>
+      <FormRow label={"Regular Price"} errors={errors?.regularPrice?.message}>
+        <Input
+          type="number"
+          id="regularPrice"
+          {...register("regularPrice", {
+            validate: (value) => value > 1 || "Value Must Be Greater Than 1",
+            required: "This Value Is Requried",
+          })}
+          disabled={isWorking}
+        />
       </FormRow>
 
-      <FormRow>
-        <Label htmlFor="maxCapacity">Maximum capacity</Label>
-        <Input type="number" id="maxCapacity" {...register("maxCapacity")} />
-      </FormRow>
-
-      <FormRow>
-        <Label htmlFor="regularPrice">Regular price</Label>
-        <Input type="number" id="regularPrice" {...register("regularPrice")} />
-      </FormRow>
-
-      <FormRow>
-        <Label htmlFor="discount">Discount</Label>
+      <FormRow label={"Discount"} errors={errors?.discount?.message}>
         <Input
           type="number"
           id="discount"
           defaultValue={0}
-          {...register("discount")}
+          {...register("discount", {
+            required: "this Field Is Requred",
+            validate: (value) => {
+              const discount = Number(value);
+              const price = getValues().regularPrice;
+              if (discount < 0) {
+                return "Discount Number Cannot Be Less Than Zero";
+              }
+              if (discount > price) {
+                return "Discount Number Cannot Be Greater Than Price";
+              }
+              return true;
+            },
+          })}
+          disabled={isWorking}
         />
       </FormRow>
 
-      <FormRow>
-        <Label htmlFor="description">Description for website</Label>
+      <FormRow label={"Descripiton for website"}>
         <Textarea
           type="number"
           id="description"
           defaultValue=""
           {...register("description")}
+          disabled={isWorking}
         />
       </FormRow>
 
-      <FormRow>
-        <Label htmlFor="image">Cabin photo</Label>
-        <FileInput id="image" accept="image/*" />
+      <FormRow label={"cabin Photo"}>
+        <FileInput
+          id="image"
+          accept="image/*"
+          {...register("image", {
+            required: isEditingSession ? false : "This Filed Is Requried",
+          })}
+          disabled={isWorking}
+        />
       </FormRow>
-
       <FormRow>
-        {/* type is an HTML attribute! */}
         <Button variation="secondary" type="reset">
           Cancel
         </Button>
-        <Button disabled={isCreating}>Add cabin</Button>
+        <Button disabled={isWorking}>
+          {" "}
+          {isEditingSession ? "Edit Cabin" : "Create New Cabin"}
+        </Button>
       </FormRow>
     </Form>
   );

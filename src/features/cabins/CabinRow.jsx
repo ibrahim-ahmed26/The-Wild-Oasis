@@ -3,6 +3,8 @@ import { formatCurrency } from "../../utils/helpers";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteCabins } from "../../services/apiCabins";
 import toast from "react-hot-toast";
+import { useState } from "react";
+import CreateCabinForm from "./CreateCabinForm";
 
 const TableRow = styled.div`
   display: grid;
@@ -69,7 +71,26 @@ const Discount = styled.div`
 `;
 
 const DeleteButton = styled.button`
-  background-color: var(--color-red-700);
+  ${(props) =>
+    props.type === "edit" &&
+    css`
+      background-color: var(--color-brand-500);
+      &:hover {
+        background-color: var(--color-brand-800);
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px var(--color-brand-800);
+      }
+    `}
+  ${(props) =>
+    props.type === "delete" &&
+    css`
+      background-color: var(--color-red-800);
+      &:hover {
+        background-color: var(--color-red-800);
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px var(--color-red-800);
+      }
+    `}
   color: white;
   border: none;
   padding: 0.4rem 0.8rem;
@@ -82,12 +103,7 @@ const DeleteButton = styled.button`
   letter-spacing: 0.3px;
   justify-self: center;
   white-space: nowrap;
-
-  &:hover {
-    background-color: var(--color-red-800);
-    transform: translateY(-1px);
-    box-shadow: 0 3px 8px rgba(220, 38, 38, 0.3);
-  }
+  margin-left: 3px;
 
   &:active {
     transform: translateY(0);
@@ -100,6 +116,7 @@ const DeleteButton = styled.button`
 `;
 
 export default function CabinRow({ cabin }) {
+  const [showForm, setShowForm] = useState(false);
   const {
     id: cabinId,
     name,
@@ -111,7 +128,7 @@ export default function CabinRow({ cabin }) {
 
   const hasDiscount = discount && discount > 0;
   const queryClient = useQueryClient();
-  const { mutate: deleteCabin } = useMutation({
+  const { mutate: deleteCabin, isLoading: isDeleting } = useMutation({
     mutationFn: deleteCabins,
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -124,17 +141,32 @@ export default function CabinRow({ cabin }) {
     },
   });
   return (
-    <TableRow role="row">
-      <Img src={image} alt={`${name} cabin`} />
-      <Cabin>{name}</Cabin>
-      <Capacity>Fits up to {maxCapacity} guests</Capacity>
-      <Price>{formatCurrency(regularPrice)}</Price>
-      <Discount hasDiscount={hasDiscount}>
-        {hasDiscount ? formatCurrency(discount) : "—"}
-      </Discount>
-      <DeleteButton type="button" onClick={() => deleteCabin(cabinId)}>
-        Delete
-      </DeleteButton>
-    </TableRow>
+    <>
+      <TableRow role="row">
+        <Img src={image} alt={`${name} cabin`} />
+        <Cabin>{name}</Cabin>
+        <Capacity>Fits up to {maxCapacity} guests</Capacity>
+        <Price>{formatCurrency(regularPrice)}</Price>
+        <Discount hasDiscount={hasDiscount}>
+          {hasDiscount ? formatCurrency(discount) : "—"}
+        </Discount>
+        <div>
+          <DeleteButton
+            type="edit"
+            onClick={() => setShowForm((show) => !show)}
+          >
+            Edit
+          </DeleteButton>
+          <DeleteButton
+            type="delete"
+            onClick={() => deleteCabin(cabinId)}
+            disabled={isDeleting}
+          >
+            Delete
+          </DeleteButton>
+        </div>
+      </TableRow>
+      {showForm && <CreateCabinForm cabinToEdit={cabin} />}
+    </>
   );
 }
