@@ -1,3 +1,4 @@
+import { createContext, useContext } from "react";
 import styled from "styled-components";
 
 const StyledTable = styled.div`
@@ -6,7 +7,6 @@ const StyledTable = styled.div`
   font-size: 1.4rem;
   background-color: var(--color-grey-0);
   border-radius: 7px;
-  overflow: hidden;
 `;
 
 const CommonRow = styled.div`
@@ -19,7 +19,6 @@ const CommonRow = styled.div`
 
 const StyledHeader = styled(CommonRow)`
   padding: 1.6rem 2.4rem;
-
   background-color: var(--color-grey-50);
   border-bottom: 1px solid var(--color-grey-100);
   text-transform: uppercase;
@@ -58,3 +57,31 @@ const Empty = styled.p`
   text-align: center;
   margin: 2.4rem;
 `;
+const TableContext = createContext();
+function Table({ children, columns }) {
+  return (
+    <StyledTable>
+      <TableContext.Provider value={{ columns }}>
+        {children}
+      </TableContext.Provider>
+    </StyledTable>
+  );
+}
+function Header({ children }) {
+  const { columns } = useContext(TableContext);
+  return <StyledHeader columns={columns}>{children}</StyledHeader>;
+}
+function Row({ children }) {
+  const { columns } = useContext(TableContext);
+  return <StyledRow columns={columns}>{children}</StyledRow>;
+}
+function Body({ data, render }) {
+  if (!data.length) return <Empty>There is No Data At The Moment</Empty>;
+  return <StyledBody>{data.map(render)}</StyledBody>;
+}
+function footer() {}
+Table.Header = Header;
+Table.Row = Row;
+Table.Body = Body;
+Table.Footer = footer;
+export default Table;

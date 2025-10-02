@@ -1,27 +1,13 @@
 import styled, { css } from "styled-components";
 import { formatCurrency } from "../../utils/helpers";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteCabins } from "../../services/apiCabins";
-import toast from "react-hot-toast";
-import { useState } from "react";
 import CreateCabinForm from "./CreateCabinForm";
-
-const TableRow = styled.div`
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  column-gap: 2.4rem;
-  align-items: center;
-  padding: 1.4rem 2.4rem;
-  transition: background-color 0.2s ease;
-
-  &:not(:last-child) {
-    border-bottom: 1px solid var(--color-grey-100);
-  }
-
-  &:hover {
-    background-color: var(--color-grey-50);
-  }
-`;
+import useDeleteCabins from "./useDeleteCabins";
+import { useCreateCabin } from "./useCreateCabin";
+import { HiDocumentDuplicate, HiPencil, HiTrash } from "react-icons/hi";
+import Modal from "../../ui/Modal";
+import ConfirmDelete from "../../ui/ConfirmDelete";
+import Table from "../../ui/Table";
+import Menus from "../../ui/Menus";
 
 const Img = styled.img`
   display: block;
@@ -91,11 +77,21 @@ const DeleteButton = styled.button`
         box-shadow: 0 3px 8px var(--color-red-800);
       }
     `}
+    ${(props) =>
+    props.type === "duplicate" &&
+    css`
+      background-color: var(--color-silver-700);
+      &:hover {
+        background-color: var(--color-silver-100);
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px var(--color-silver-100);
+      }
+    `}
   color: white;
   border: none;
   padding: 0.4rem 0.8rem;
   border-radius: 3px;
-  font-size: 1rem;
+  font-size: 2rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -116,7 +112,6 @@ const DeleteButton = styled.button`
 `;
 
 export default function CabinRow({ cabin }) {
-  const [showForm, setShowForm] = useState(false);
   const {
     id: cabinId,
     name,
@@ -124,25 +119,26 @@ export default function CabinRow({ cabin }) {
     "regular-price": regularPrice,
     discount,
     image,
+    description,
   } = cabin;
-
+  function handleDuplicate() {
+    createCabins({
+      name: `Copy of ${name}`,
+      "max-capacity": maxCapacity,
+      "regular-price": regularPrice,
+      discount,
+      image,
+      description,
+      isDuplicate: true,
+    });
+    console.log(image);
+  }
   const hasDiscount = discount && discount > 0;
-  const queryClient = useQueryClient();
-  const { mutate: deleteCabin, isLoading: isDeleting } = useMutation({
-    mutationFn: deleteCabins,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["cabins"],
-      });
-      toast.success("Cabin deleted successfully ✅");
-    },
-    onError: (err) => {
-      toast.error(`${err.message} ❌`);
-    },
-  });
+  const { deleteCabin, isDeleting } = useDeleteCabins();
+  const { isCreating, createCabins } = useCreateCabin();
   return (
-    <>
-      <TableRow role="row">
+    <Table columns="repeat(6,1fr)">
+      <Table.Row>
         <Img src={image} alt={`${name} cabin`} />
         <Cabin>{name}</Cabin>
         <Capacity>Fits up to {maxCapacity} guests</Capacity>
@@ -151,22 +147,44 @@ export default function CabinRow({ cabin }) {
           {hasDiscount ? formatCurrency(discount) : "—"}
         </Discount>
         <div>
-          <DeleteButton
-            type="edit"
-            onClick={() => setShowForm((show) => !show)}
-          >
-            Edit
-          </DeleteButton>
-          <DeleteButton
-            type="delete"
-            onClick={() => deleteCabin(cabinId)}
-            disabled={isDeleting}
-          >
-            Delete
-          </DeleteButton>
+          <Modal>
+            <Menus.Menu>
+              <Menus.Toggle id={cabinId} />
+              <Menus.List id={cabinId}>
+                <Menus.Button
+                  onClick={handleDuplicate}
+                  disabled={isCreating}
+                  icon={<HiDocumentDuplicate />}
+                >
+                  Duplicate
+                </Menus.Button>
+                <Modal.Open name="edit">
+                  <Menus.Button icon={<HiPencil />}>Edit</Menus.Button>
+                </Modal.Open>
+                <Modal.Open name="delete">
+                  <Menus.Button
+                    icon={<HiTrash />}
+                    onClick={() => console.log("Hellows")}
+                  >
+                    Delete
+                  </Menus.Button>
+                </Modal.Open>
+              </Menus.List>
+
+              <Modal.Window name="edit">
+                <CreateCabinForm cabinToEdit={cabin} />
+              </Modal.Window>
+              <Modal.Window name="delete">
+                <ConfirmDelete
+                  resourceName="cabins"
+                  onConfirm={() => deleteCabin(cabinId)}
+                  disabled={isDeleting}
+                />
+              </Modal.Window>
+            </Menus.Menu>
+          </Modal>
         </div>
-      </TableRow>
-      {showForm && <CreateCabinForm cabinToEdit={cabin} />}
-    </>
+      </Table.Row>
+    </Table>
   );
 }
