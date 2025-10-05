@@ -85,8 +85,8 @@ body {
 }
 
 input,
-button,
 textarea,
+button,
 select {
   font: inherit;
   color: inherit;

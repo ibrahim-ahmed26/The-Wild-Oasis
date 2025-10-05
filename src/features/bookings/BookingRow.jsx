@@ -38,13 +38,13 @@ function BookingRow({
   booking: {
     id: bookingId,
     created_at,
-    startDate,
-    endDate,
-    numNights,
+    "start-date": startDate,
+    "end-date": endDate,
+    "num-nights": numNights,
     numGuests,
-    totalPrice,
+    "total-price": totalPrice,
     status,
-    guests: { fullName: guestName, email },
+    guests: { "full-name": guestName, email },
     cabins: { name: cabinName },
   },
 }) {
