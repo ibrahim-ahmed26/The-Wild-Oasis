@@ -13,7 +13,6 @@ import { useGetBooking } from "./useGetBooking";
 import Spinner from "../../ui/Spinner";
 import useCheckOut from "../check-in-out/useCheckOut";
 import useDeleteBooking from "./useDeleteBooking";
-import { useState } from "react";
 import ConfirmDelete from "../../ui/ConfirmDelete";
 import Modal from "../../ui/Modal";
 const HeadingGroup = styled.div`
@@ -24,7 +23,6 @@ const HeadingGroup = styled.div`
 
 function BookingDetail() {
   const { booking, isLoading } = useGetBooking();
-  const [showConfirm, setShowConfirm] = useState(false);
   const moveBack = useMoveBack();
   const { checkIn, isChecking } = useCheckIn();
   const { checkOut, isCheckingOut } = useCheckOut();
@@ -37,7 +35,6 @@ function BookingDetail() {
       hasBreakfast: booking["has-breakfast"],
     });
   }
-  function handleDelete() {}
   function handleCheckOut() {
     checkOut(id);
   }
@@ -81,10 +78,7 @@ function BookingDetail() {
         )}
         {(status === "checked-out" || status === "unconfirmed") && (
           <Modal>
-            <Modal.Open
-              name="Deleting Booking"
-              onClose={() => setShowConfirm(false)}
-            >
+            <Modal.Open name="Deleting Booking">
               <Button variations="danger">Delete</Button>
             </Modal.Open>
             <Modal.Window name="Deleting Booking">
@@ -92,10 +86,8 @@ function BookingDetail() {
                 resourceName={`Booking #${id}`}
                 onConfirm={() => {
                   deleteSingleBooking(id);
-                  setShowConfirm(false);
                 }}
                 disabled={isDeleteing}
-                onCloseModal={() => setShowConfirm(false)}
               />
             </Modal.Window>
           </Modal>

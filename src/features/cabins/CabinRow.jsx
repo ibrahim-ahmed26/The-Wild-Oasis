@@ -56,61 +56,6 @@ const Discount = styled.div`
     `}
 `;
 
-const DeleteButton = styled.button`
-  ${(props) =>
-    props.type === "edit" &&
-    css`
-      background-color: var(--color-brand-500);
-      &:hover {
-        background-color: var(--color-brand-800);
-        transform: translateY(-1px);
-        box-shadow: 0 3px 8px var(--color-brand-800);
-      }
-    `}
-  ${(props) =>
-    props.type === "delete" &&
-    css`
-      background-color: var(--color-red-800);
-      &:hover {
-        background-color: var(--color-red-800);
-        transform: translateY(-1px);
-        box-shadow: 0 3px 8px var(--color-red-800);
-      }
-    `}
-    ${(props) =>
-    props.type === "duplicate" &&
-    css`
-      background-color: var(--color-silver-700);
-      &:hover {
-        background-color: var(--color-silver-100);
-        transform: translateY(-1px);
-        box-shadow: 0 3px 8px var(--color-silver-100);
-      }
-    `}
-  color: white;
-  border: none;
-  padding: 0.4rem 0.8rem;
-  border-radius: 3px;
-  font-size: 2rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  justify-self: center;
-  white-space: nowrap;
-  margin-left: 3px;
-
-  &:active {
-    transform: translateY(0);
-  }
-
-  &:focus {
-    outline: 2px solid var(--color-red-200);
-    outline-offset: 2px;
-  }
-`;
-
 export default function CabinRow({ cabin }) {
   const {
     id: cabinId,
