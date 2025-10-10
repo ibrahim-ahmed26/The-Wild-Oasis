@@ -20,7 +20,6 @@ export async function getBookings({ filter, sortBy, page }) {
   const to = from + PAGE_SIZE - 1;
   if (page) query = query.range(from, to);
   const { data, error, count } = await query;
-  console.log({ data, error });
   if (error) {
     console.error(error);
     throw new Error("Bookings couldn't be loaded");
@@ -126,12 +125,16 @@ export async function updateBooking(id, obj) {
 // DELETE A BOOKING
 // ===============================
 export async function deleteBooking(id) {
-  const { data, error } = await supabase.from("bookings").delete().eq("id", id);
+  const { data, error } = await supabase
+    .from("bookings")
+    .delete()
+    .eq("id", id)
+    .select();
 
   if (error) {
     console.error(error);
     throw new Error("Booking could not be deleted");
   }
 
-  return data;
+  return { id, data };
 }

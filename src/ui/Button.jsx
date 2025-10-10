@@ -52,7 +52,14 @@ const BUTTON = styled.button`
   border-radius: var(--border-radius-sm);
   ${(props) => sizes[props.sizes]};
   ${(props) => variations[props.variations]};
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    background-color: var(--color-grey-300);
+    color: var(--color-grey-700);
+  }
 `;
+
 BUTTON.defaultProps = {
   variations: "primary",
   sizes: "medium",

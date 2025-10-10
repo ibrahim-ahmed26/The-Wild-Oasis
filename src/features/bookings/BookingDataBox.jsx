@@ -105,19 +105,34 @@ const Footer = styled.footer`
 function BookingDataBox({ booking }) {
   const {
     created_at,
-    startDate,
-    endDate,
-    numNights,
-    numGuests,
-    cabinPrice,
-    extrasPrice,
-    totalPrice,
-    hasBreakfast,
+    "start-date": startDate,
+    "end-date": endDate,
+    "num-nights": numNights,
+    "num-guests": numGuests,
+    "cabin-price": cabinPrice,
+    "extras-price": extrasPrice,
+    "total-price": totalPrice,
+    "has-breakfast": hasBreakfast,
     observations,
-    isPaid,
-    guests: { fullName: guestName, email, country, countryFlag, nationalID },
+    "is-paid": isPaid,
+    guests: {
+      full_name: guestName,
+      email,
+      country_flag: countryFlag,
+      national_id: nationalID,
+      country,
+    },
     cabins: { name: cabinName },
   } = booking;
+  function getFlagUrl(emoji) {
+    if (!emoji) return null;
+    const codePoints = [...emoji]
+      .map((c) => c.codePointAt(0) - 127397)
+      .map((c) => String.fromCharCode(c))
+      .join("")
+      .toLowerCase();
+    return `https://flagcdn.com/${codePoints}.svg`;
+  }
 
   return (
     <StyledBookingDataBox>
@@ -140,7 +155,13 @@ function BookingDataBox({ booking }) {
 
       <Section>
         <Guest>
-          {countryFlag && <Flag src={countryFlag} alt={`Flag of ${country}`} />}
+          {countryFlag && (
+            <Flag
+              src={getFlagUrl(countryFlag)}
+              alt={`Flag of ${country || "unknown"}`}
+            />
+          )}
+
           <p>
             {guestName} {numGuests > 1 ? `+ ${numGuests - 1} guests` : ""}
           </p>

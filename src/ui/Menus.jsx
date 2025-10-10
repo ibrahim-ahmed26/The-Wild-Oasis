@@ -47,6 +47,7 @@ const StyledButton = styled.button`
   align-items: center;
   gap: 1.2rem;
   cursor: pointer;
+  white-space: nowrap;
 
   &:hover {
     background-color: var(--color-grey-50);
@@ -111,7 +112,6 @@ function Button({ children, icon, onClick, disabled, ...props }) {
   function handleClick() {
     onClick?.();
     close();
-    console.log("Clicked Sucess");
   }
 
   return (

@@ -162,12 +162,7 @@ export default function CabinRow({ cabin }) {
                   <Menus.Button icon={<HiPencil />}>Edit</Menus.Button>
                 </Modal.Open>
                 <Modal.Open name="delete">
-                  <Menus.Button
-                    icon={<HiTrash />}
-                    onClick={() => console.log("Hellows")}
-                  >
-                    Delete
-                  </Menus.Button>
+                  <Menus.Button icon={<HiTrash />}>Delete</Menus.Button>
                 </Modal.Open>
               </Menus.List>
 
