@@ -1,0 +1,12 @@
+import { HiArrowLeftOnRectangle } from "react-icons/hi2";
+import ButtonIcon from "../../ui/ButtonIcon";
+import { useLogout } from "./useLogout";
+
+export default function Logout() {
+  const { logout, isLoading } = useLogout();
+  return (
+    <ButtonIcon disabled={isLoading} onClick={logout}>
+      <HiArrowLeftOnRectangle />
+    </ButtonIcon>
+  );
+}

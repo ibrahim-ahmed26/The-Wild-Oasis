@@ -21,7 +21,6 @@ const HEADING = styled.h1`
     `}
   text-transform: capitalize;
   line-height: 1.4;
-  text-align: center;
   padding-top: 5px;
   margin: 5px 0px;
 `;
