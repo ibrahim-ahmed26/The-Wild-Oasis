@@ -1,4 +1,4 @@
-import supabase from "./supabase";
+import supabase, { supabaseUrl } from "./supabase";
 export async function signup({ email, fullname, password }) {
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -44,3 +44,29 @@ export async function logout() {
     throw new Error(error.message);
   }
 }
+export async function updateUser({ password, avatar, fullname }) {
+  let updatedData;
+  if (password) updatedData = { password };
+  if (fullname) updatedData = { data: { fullname } };
+  const { data, error } = await supabase.auth.updateUser(updatedData);
+  if (error) throw new Error(error.message);
+  if (!avatar) return data;
+  const fileName = `avatar-${Date.now()}-${avatar.name}`;
+  const { error: storageError } = await supabase.storage
+    .from("Avatars")
+    .upload(fileName, avatar, { upsert: true });
+
+  if (storageError) throw new Error(storageError.message);
+
+  const { data: updatedUser, error: updateError } =
+    await supabase.auth.updateUser({
+      data: {
+        avatar: `${supabaseUrl}/storage/v1/object/public/Avatars/${fileName}`,
+      },
+    });
+
+  if (updateError) throw new Error(updateError.message);
+
+  return updatedUser;
+}
+//https://qkfipiszaklwcwnlnruv.supabase.co/storage/v1/object/public/Avatars/IbrahimAiPhoto.png

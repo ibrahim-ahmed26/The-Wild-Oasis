@@ -7,21 +7,25 @@ import FormRow from "../../ui/FormRow";
 import Input from "../../ui/Input";
 
 import { useUser } from "./useUser";
+import { useUpdate } from "./useUpdate";
+import { useForm } from "react-hook-form";
 
 function UpdateUserDataForm() {
   // We don't need the loading state, and can immediately use the user data, because we know that it has already been loaded at this point
   const {
     user: {
       email,
-      user_metadata: { fullName: currentFullName },
+      user_metadata: { fullname: currentFullName },
     },
   } = useUser();
 
-  const [fullName, setFullName] = useState(currentFullName);
+  const [fullname, setFullName] = useState(currentFullName);
   const [avatar, setAvatar] = useState(null);
-
+  const { updateUser, isUpdating } = useUpdate();
   function handleSubmit(e) {
     e.preventDefault();
+    if (!fullname) return;
+    updateUser({ fullname, avatar });
   }
 
   return (
@@ -32,9 +36,9 @@ function UpdateUserDataForm() {
       <FormRow label="Full name">
         <Input
           type="text"
-          value={fullName}
+          value={fullname}
           onChange={(e) => setFullName(e.target.value)}
-          id="fullName"
+          id="fullname"
         />
       </FormRow>
       <FormRow label="Avatar image">
@@ -48,7 +52,7 @@ function UpdateUserDataForm() {
         <Button type="reset" variation="secondary">
           Cancel
         </Button>
-        <Button>Update account</Button>
+        <Button disabled={isUpdating}>Update account</Button>
       </FormRow>
     </Form>
   );

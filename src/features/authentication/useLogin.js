@@ -14,7 +14,7 @@ export function useLogin() {
       }),
     onSuccess: (data) => {
       toast.success(
-        `Welcome back, ${data?.user?.email?.split("@")[0] || "there"}! 👋`
+        `Welcome back, ${data?.user?.user_metadata.fullname || "there"}! 👋`
       );
       queryClient.setQueryData(["user"], data.user);
       navigate("/dashboard", { replace: true });
