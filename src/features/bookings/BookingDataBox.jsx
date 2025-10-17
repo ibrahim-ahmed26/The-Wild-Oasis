@@ -11,6 +11,7 @@ import DataItem from "../../ui/DataItem";
 import { Flag } from "../../ui/Flag";
 
 import { formatDistanceFromNow, formatCurrency } from "../../utils/helpers";
+import getFlagUrl from "../../utils/getFlagUrl";
 
 const StyledBookingDataBox = styled.section`
   /* Box */
@@ -124,15 +125,6 @@ function BookingDataBox({ booking }) {
     },
     cabins: { name: cabinName },
   } = booking;
-  function getFlagUrl(emoji) {
-    if (!emoji) return null;
-    const codePoints = [...emoji]
-      .map((c) => c.codePointAt(0) - 127397)
-      .map((c) => String.fromCharCode(c))
-      .join("")
-      .toLowerCase();
-    return `https://flagcdn.com/${codePoints}.svg`;
-  }
 
   return (
     <StyledBookingDataBox>

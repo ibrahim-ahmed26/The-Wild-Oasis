@@ -90,7 +90,7 @@ export async function getStaysTodayActivity() {
     .from("bookings")
     .select("*, guests:guestsId(full_name, nationality, country_flag)")
     .or(
-      `and(status.eq.unconfirmed,start_date.eq.${getToday()}),and(status.eq.checked-in,end_date.eq.${getToday()})`
+      `and(status.eq.unconfirmed,"start-date".eq.${getToday()}),and(status.eq.checked-in,"end-date".eq.${getToday()})`
     )
     .order("created_at");
 

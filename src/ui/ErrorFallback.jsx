@@ -1,4 +1,6 @@
 import styled from "styled-components";
+import GlobalStyles from "../styles/GlobalStyles";
+import BUTTON from "./Button";
 
 const StyledErrorFallback = styled.main`
   height: 100vh;
@@ -29,3 +31,31 @@ const Box = styled.div`
     color: var(--color-grey-500);
   }
 `;
+const StyledDiv = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+`;
+export default function ErrorFallback({ error }) {
+  return (
+    <>
+      <GlobalStyles />
+      <StyledErrorFallback>
+        <Box>
+          <h1>Something went wrong 😥</h1>
+          <p>{error?.message || "An unexpected error occurred."}</p>
+          <StyledDiv>
+            <BUTTON
+              variations="secondary"
+              sizes="medium"
+              onClick={() => window.location.reload()}
+            >
+              Try Again
+            </BUTTON>
+          </StyledDiv>
+        </Box>
+      </StyledErrorFallback>
+    </>
+  );
+}

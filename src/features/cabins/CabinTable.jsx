@@ -9,6 +9,7 @@ import Empty from "../../ui/Empty";
 export default function CabinTable() {
   const { cabinData, isLoading } = useGetCabins();
   const [searchParams] = useSearchParams();
+
   if (isLoading) return <Spinner />;
   if (!cabinData.length) return <Empty resourceName={"cabins"} />;
   const filterdValue = searchParams.get("discount") || "all";
