@@ -197,6 +197,19 @@ img {
   /* For dark mode */
   filter: grayscale(var(--image-grayscale)) opacity(var(--image-opacity));
 }
+.app-container {
+  position: relative;
+}
+
+.app-content {
+  display: block;
+}
+
+@media (max-width: 1024px) {
+  .app-content {
+    display: none; /* hide the app on small screens */
+  }
+}
 `;
 
 export default GlobalStyles;
